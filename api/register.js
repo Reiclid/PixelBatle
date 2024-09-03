@@ -1,19 +1,28 @@
-import db from '../server/database.js';
+import { Client } from '@vercel/postgres';
 
-export default function handler(req, res) {
+export default async function handler(req, res) {
+    const client = new Client({
+        connectionString: process.env.DATABASE_URL, // Використовуй змінну середовища
+        ssl: {
+            rejectUnauthorized: false
+        }
+    });
+
+    await client.connect();
+
     if (req.method === 'POST') {
         const { username } = req.body;
+        const color = '#' + Math.floor(Math.random() * 16777215).toString(16);
 
-        // Додаємо гравця в базу даних
-        const color = '#' + Math.floor(Math.random() * 16777215).toString(16); // Випадковий колір для гравця
-        db.run('INSERT INTO players (username, color) VALUES (?, ?)', [username, color], function (err) {
-            if (err) {
-                console.error("Помилка реєстрації гравця:", err.message);
-                return res.status(500).json({ message: 'Помилка реєстрації гравця' });
-            }
-
-            res.status(200).json({ message: 'Гравець успішно зареєстрований!', playerId: this.lastID, color });
-        });
+        try {
+            const result = await client.query('INSERT INTO players (username, color) VALUES ($1, $2) RETURNING *', [username, color]);
+            res.status(200).json({ message: 'Гравець успішно зареєстрований!', player: result.rows[0] });
+        } catch (error) {
+            console.error("Помилка реєстрації гравця:", error.message);
+            res.status(500).json({ message: 'Помилка реєстрації гравця' });
+        } finally {
+            await client.end();
+        }
     } else {
         res.setHeader('Allow', ['POST']);
         res.status(405).end(`Method ${req.method} Not Allowed`);
