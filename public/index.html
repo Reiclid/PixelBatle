@@ -4,17 +4,19 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pixel Battle</title>
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="/styles.css">
 </head>
 <body>
     <h1>Pixel Battle</h1>
     <form id="register-form">
         <input type="text" id="username" placeholder="Ім'я" required>
-        <input type="password" id="password" placeholder="Пароль" required>
         <button type="submit">Реєстрація</button>
     </form>
 
     <canvas id="pixel-canvas" width="500" height="500"></canvas>
+
+    <h2>Гравці</h2>
+    <ul id="player-list"></ul>
 
     <script type="module" src="/script.js"></script>
 </body>
